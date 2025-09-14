@@ -1,0 +1,113 @@
+import math
+board = [' ' for _ in range(9)]
+
+human_player = 'X'
+ai_player = 'O'
+
+
+def print_board():
+    print()
+    for i in range(3):
+        print(' ' + board[3*i] + ' | ' + board[3*i + 1] + ' | ' + board[3*i + 2])
+        if i < 2:
+            print("---+---+---")
+    print()
+
+
+def is_winner(player):
+    win_conditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],   
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], 
+        [0, 4, 8], [2, 4, 6]              
+    ]
+    for condition in win_conditions:
+        if all(board[pos] == player for pos in condition):
+            return True
+    return False
+
+
+def is_board_full():
+    return ' ' not in board
+
+
+def minimax(is_maximizing):
+    if is_winner(ai_player):
+        return 1
+    if is_winner(human_player):
+        return -1
+    if is_board_full():
+        return 0
+
+    if is_maximizing:
+        best_score = -math.inf
+        for i in range(9):
+            if board[i] == ' ':
+                board[i] = ai_player
+                score = minimax(False)
+                board[i] = ' '
+                best_score = max(score, best_score)
+        return best_score
+    else:
+        best_score = math.inf
+        for i in range(9):
+            if board[i] == ' ':
+                board[i] = human_player
+                score = minimax(True)
+                board[i] = ' '
+                best_score = min(score, best_score)
+        return best_score
+
+
+def best_move():
+    move = -1
+    best_score = -math.inf
+    for i in range(9):
+        if board[i] == ' ':
+            board[i] = ai_player
+            score = minimax(False)
+            board[i] = ' '
+            if score > best_score:
+                best_score = score
+                move = i
+    return move
+
+
+def play_game():
+    print("Welcome to Tic-Tac-Toe!")
+    print_board()
+
+    while True:
+        # Human turn
+        while True:
+            try:
+                move = int(input("Enter your move (1-9): ")) - 1
+                if 0 <= move <= 8 and board[move] == ' ':
+                    board[move] = human_player
+                    break
+                else:
+                    print("Invalid move. Try again.")
+            except ValueError:
+                print("Please enter a valid number from 1 to 9.")
+
+        print_board()
+
+        if is_winner(human_player):
+            print("Congratulations! You win!")
+            break
+        if is_board_full():
+            print("It's a tie!")
+            break
+
+        # AI turn
+        print("AI is making a move...")
+        ai_move = best_move()
+        board[ai_move] = ai_player
+        print_board()
+
+        if is_winner(ai_player):
+            print("AI wins! Better luck next time.")
+            break
+        if is_board_full():
+            print("It's a tie!")
+            break
+play_game()
